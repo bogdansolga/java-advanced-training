@@ -1,0 +1,43 @@
+logging:
+  level:
+    root: info
+    com:
+      zaxxer: warn
+    org:
+      apache: warn
+      hibernate: warn
+      springframework: warn
+
+  pattern:
+    # special characters need to be escaped / quoted
+    console: '%clr([%thread] [%date{HH:mm:ss.SSS}]){faint} %clr(%2p) %clr(%-40.40logger{36}){cyan} %m%n%wex'
+
+server:
+  tomcat:
+    threads:
+      max: 10
+      min-spare: 2
+
+spring:
+  datasource:
+    # in-memory database
+    url: jdbc:h2:mem:test
+
+    # on disk database
+    #url: jdbc:h2:~/test
+
+    username: sa
+    password: aVeryComplexPassword
+
+  jpa:
+    hibernate:
+      ddl-auto: none # replace with 'create' for the first execution
+    open-in-view: false
+    properties:
+      hibernate:
+        show_sql: false
+        format_sql: true
+
+execution:
+  time:
+    tracing: true

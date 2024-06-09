@@ -1,0 +1,20 @@
+target/
+
+# Idea
+*.iml
+*.ipr
+*.iws
+.idea
+**/target
+
+# Eclipse
+.classpath
+.project
+.settings
+
+# Mac
+**/.DS_Store
+
+# backup files - both Windows and *n*x
+*.bak
+~*
