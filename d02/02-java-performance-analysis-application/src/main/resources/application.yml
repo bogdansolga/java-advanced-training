@@ -15,8 +15,9 @@ logging:
 server:
   tomcat:
     threads:
-      max: 10
+      max: 4
       min-spare: 2
+    connection-timeout: 3
 
 spring:
   datasource:
@@ -31,7 +32,7 @@ spring:
 
   jpa:
     hibernate:
-      ddl-auto: none # replace with 'create' for the first execution
+      ddl-auto: create # replace with 'create' for the first execution
     open-in-view: false
     properties:
       hibernate:

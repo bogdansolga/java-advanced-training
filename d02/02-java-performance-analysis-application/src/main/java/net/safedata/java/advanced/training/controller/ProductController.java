@@ -48,10 +48,11 @@ public class ProductController {
         deferredResult.onTimeout(() -> ResponseEntity.status(HttpStatus.REQUEST_TIMEOUT)
                                                      .body("The request has timed-out"));
         try {
-            //setTotalSalesSync(deferredResult);
-            setTotalSalesAsync(deferredResult);
-            //if (true) throw new RuntimeException("Ooops :)");
-        } catch (RuntimeException ex) {
+            Thread.sleep(70000);
+            deferredResult.setResult(ResponseEntity.ok()
+                                                   .body("The total sales value is " +
+                                                           productService.getTotalSales()));
+        } catch (RuntimeException | InterruptedException ex) {
             deferredResult.setErrorResult(ResponseEntity.badRequest()
                                                         .body(ex.getMessage()));
         }

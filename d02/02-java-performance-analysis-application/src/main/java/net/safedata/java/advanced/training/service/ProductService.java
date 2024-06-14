@@ -3,9 +3,12 @@ package net.safedata.java.advanced.training.service;
 import net.safedata.java.advanced.training.domain.model.ProductEntity;
 import net.safedata.java.advanced.training.domain.repository.ProductRepository;
 import net.safedata.java.advanced.training.model.Product;
+import net.safedata.java.advanced.training.order.OrderStatus;
+import net.safedata.java.advanced.training.order.factory.AbstractOrderProcessingResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
@@ -19,6 +22,8 @@ import java.text.DecimalFormat;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
@@ -43,21 +48,36 @@ public class ProductService {
     private final JdbcTemplate jdbcTemplate;
     private final ProductRepository productRepository;
 
+    private final Map<OrderStatus, AbstractOrderProcessingResult> orderStatusToProcessorMap;
+
     @Autowired
-    public ProductService(DataSource dataSource, ProductRepository productRepository) {
+    public ProductService(ApplicationContext applicationContext, DataSource dataSource, ProductRepository productRepository) {
         this.jdbcTemplate = new JdbcTemplate(dataSource);
         this.productRepository = productRepository;
+
+        final Map<String, AbstractOrderProcessingResult> beansOfType = applicationContext.getBeansOfType(AbstractOrderProcessingResult.class);
+        orderStatusToProcessorMap = getOrderProcessingMap(beansOfType);
+
+        System.setProperty("java.util.concurrent.ForkJoinPool.common.parallelism", "4");
+    }
+
+    private Map<OrderStatus, AbstractOrderProcessingResult> getOrderProcessingMap(Map<String, AbstractOrderProcessingResult> beansOfType) {
+        return beansOfType.values()
+                          .stream()
+                          .collect(Collectors.toMap(AbstractOrderProcessingResult::getStatus, Function.identity()));
     }
 
     //@EventListener(ApplicationReadyEvent.class)
     @Transactional
     public void insertSomeProducts() {
-        List<ProductEntity> productsToBeInserted = new ArrayList<>();
-        IntStream.rangeClosed(0, 100)
-                 .parallel() // low-hanging fruit --> always parallel
-                 .forEach(index -> productsToBeInserted.add(buildProductEntity(index)));
+        productRepository.saveAll(buildProductsToBeInserted());
+    }
 
-        productRepository.saveAll(productsToBeInserted);
+    private static List<ProductEntity> buildProductsToBeInserted() {
+        return IntStream.rangeClosed(0, 100)
+                        .parallel() // low-hanging fruit --> always parallel
+                        .mapToObj(ProductService::buildProductEntity)
+                        .collect(Collectors.toList());
     }
 
     private static ProductEntity buildProductEntity(int index) {
@@ -82,12 +102,10 @@ public class ProductService {
         LOGGER.info("JVM memory in use after: {} MB", memoryAfter);
     }
 
-    /*
     @Scheduled(
             fixedRate = 20,
             timeUnit = TimeUnit.SECONDS
     )
-    */
     public void simulateProductsProcessingUsingAStopwatch() {
         System.out.println();
 
@@ -115,7 +133,7 @@ public class ProductService {
     }
 
     private void processALotOfProducts() {
-        final int productsNumber = RANDOM.nextInt(50000); //000
+        final int productsNumber = Math.abs(RANDOM.nextInt(50000) + 1); //000
         generateProducts(productsNumber);
 
         final double totalPrice = getProductsPriceSum(products);
@@ -126,8 +144,8 @@ public class ProductService {
     }
 
     private void generateProducts(int productsNumber) {
+        LOGGER.info("Generating {} products...", productsNumber);
         IntStream.rangeClosed(0, productsNumber)
-                 .parallel() // low-hanging fruit --> always parallel
                  .forEach(index -> products.add(buildProduct(index)));
 
         @SuppressWarnings("unused")
@@ -164,13 +182,14 @@ public class ProductService {
     }
 
     public List<Product> getALotOfProducts(final String productType, final String retrievingType) {
-        final int howMany = RANDOM.nextInt(70);
-        final List<Product> products = new ArrayList<>(howMany);
-        IntStream.range(0, howMany)
-                 .peek(this::sleepALittle)
-                 .forEach(index -> products.add(buildProduct(index)));
+        return buildProductsList(RANDOM.nextInt(70));
+    }
 
-        return products;
+    private List<Product> buildProductsList(int howMany) {
+        return IntStream.range(0, howMany)
+                        .peek(this::sleepALittle)
+                        .mapToObj(this::buildProduct)
+                        .toList();
     }
 
     public synchronized List<Product> getSynchronizedProducts(final String productType) {
@@ -178,7 +197,8 @@ public class ProductService {
     }
 
     private Product buildProduct(final int index) {
-        //sleepALittle(10);
+        //FIXME remove the sleep from here
+        sleepALittle(200);
         return new Product(index, "The product " + index, 1000 * RANDOM.nextInt(50000) + 10);
     }
 
