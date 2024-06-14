@@ -6,8 +6,8 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 @Configuration
-@EnableJpaRepositories(basePackages = "com.ing.springboot.training.d04.s02.repository")
+@EnableJpaRepositories(basePackages = "net.safedata.java.advanced.training.testing.repository")
 @EnableTransactionManagement
-@EntityScan(basePackages = "com.ing.spring.training.jpa.model")
+@EntityScan(basePackages = "net.safedata.java.advanced.training.jpa.model")
 public class ProductServiceConfig {
 }
