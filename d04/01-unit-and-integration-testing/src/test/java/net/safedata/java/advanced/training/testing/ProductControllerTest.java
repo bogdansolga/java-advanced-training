@@ -45,7 +45,7 @@ public class ProductControllerTest extends AbstractTransactionalTestNGSpringCont
         productService.save(new ProductDTO(1, PRODUCT_NAME));
     }
 
-    @Test
+    @Test(description = "Given the content type is correct, when getting a product, then the status and theNameAreCorrect")
     public void givenTheContentTypeIsCorrect_WhenGettingAProduct_ThenTheStatusAndTheNameAreCorrect() {
         given()
                 .accept(ContentType.JSON).

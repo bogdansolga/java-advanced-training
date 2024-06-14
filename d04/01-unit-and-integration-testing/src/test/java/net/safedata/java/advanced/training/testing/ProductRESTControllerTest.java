@@ -21,7 +21,7 @@ class ProductRESTControllerTest {
     private MockMvc mockMvc;
 
     @Test
-    void given_thereAreTabletsInTheDatabase_andANewTabletIsCreated_whenRetrievingTablets_thenTheirNumberIsCorrect()
+    void givenTwoProductsAreCreated_whenRetrievingTheProducts_thenTheirNumberIsCorrect()
             throws Exception {
         MockHttpServletRequestBuilder builder =
                 MockMvcRequestBuilders.post("/product")

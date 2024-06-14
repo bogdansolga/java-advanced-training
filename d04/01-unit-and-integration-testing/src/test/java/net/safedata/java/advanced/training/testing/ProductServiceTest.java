@@ -12,7 +12,6 @@ import org.mockito.Mock;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.util.StringUtils;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -66,7 +65,7 @@ class ProductServiceTest {
     @Test
     @DisplayName("Given there are no available products, when retrieving the products then no products are retrieved")
     void givenThereAreNoAvailableProducts_whenRetrievingProducts_thenNoProductsAreReturned() {
-        when(productRepository.findAll()).thenReturn(new ArrayList<>());
+        when(productRepository.findAll()).thenReturn(List.of());
 
         final List<ProductDTO> allProducts = productService.getAll();
 
@@ -112,6 +111,6 @@ class ProductServiceTest {
         verify(productRepository, times(1)).save(any(Product.class));
 
         assertNotNull(response);
-        assertThat("The displayed error message", response.length(), not(0));
+        assertThat("The response length must not be 0", response.length(), not(0));
     }
 }
