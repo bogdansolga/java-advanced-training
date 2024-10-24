@@ -42,8 +42,8 @@ public class ProductService {
     private final DecimalFormat decimalFormat = new DecimalFormat("#,###.#");
 
     // kept in memory to show the case of a continuously growing memory
-    private final List<Product> products = new ArrayList<>();
-    private double totalSales = 0;
+    private final List<Product> products;
+    private double totalSales;
 
     private final JdbcTemplate jdbcTemplate;
     private final ProductRepository productRepository;
@@ -54,6 +54,9 @@ public class ProductService {
     public ProductService(ApplicationContext applicationContext, DataSource dataSource, ProductRepository productRepository) {
         this.jdbcTemplate = new JdbcTemplate(dataSource);
         this.productRepository = productRepository;
+
+        this.products = new ArrayList<>();
+        this.totalSales = 0;
 
         final Map<String, AbstractOrderProcessingResult> beansOfType = applicationContext.getBeansOfType(AbstractOrderProcessingResult.class);
         orderStatusToProcessorMap = getOrderProcessingMap(beansOfType);
@@ -84,8 +87,13 @@ public class ProductService {
         return new ProductEntity(index, "The product " + index, 1000 * RANDOM.nextInt(50000));
     }
 
+    // we don't know what it does, need to read it
+    private void processForSaving(Product product) {
+
+    }
+
     @Scheduled(
-            fixedRate = 3,
+            fixedRate = 10,
             timeUnit = TimeUnit.SECONDS
     )
     public void simulateProductsProcessing() {
@@ -103,7 +111,7 @@ public class ProductService {
     }
 
     @Scheduled(
-            fixedRate = 20,
+            fixedRate = 5,
             timeUnit = TimeUnit.SECONDS
     )
     public void simulateProductsProcessingUsingAStopwatch() {
@@ -114,22 +122,33 @@ public class ProductService {
         final long memoryBefore = getFreeMemoryInMB();
         LOGGER.info("JVM memory in use before the processing: {} MB", memoryBefore);
 
-        stopWatch.start("Processing a lot of products");
-        processALotOfProducts();
-        stopWatch.stop();
-
-        stopWatch.start("A short expensive task");
-        sleepALittle(200);
-        stopWatch.stop();
-
-        stopWatch.start("A long expensive task");
-        CompletableFuture.runAsync(() -> sleepALittle(5000)); // executed on the ForkJoin pool
-        stopWatch.stop();
+        //CTRL + Alt + M -> Extract method + name method properly (recurrent + iterative)
+        performProcessing(stopWatch);
+        sleepALittle(stopWatch);
+        simulateLongRunningTask(stopWatch);
 
         final long memoryAfter = getFreeMemoryInMB();
         LOGGER.info("JVM memory in use after the processing: {} MB", memoryAfter);
 
         LOGGER.info("Execution summary: {}", stopWatch.prettyPrint());
+    }
+
+    private void simulateLongRunningTask(StopWatch stopWatch) {
+        stopWatch.start("A long expensive task");
+        CompletableFuture.runAsync(() -> sleepALittle(5000)); // executed on the ForkJoin pool
+        stopWatch.stop();
+    }
+
+    private void sleepALittle(StopWatch stopWatch) {
+        stopWatch.start("A short expensive task");
+        sleepALittle(200);
+        stopWatch.stop();
+    }
+
+    private void performProcessing(StopWatch stopWatch) {
+        stopWatch.start("Processing a lot of products");
+        processALotOfProducts();
+        stopWatch.stop();
     }
 
     private void processALotOfProducts() {
@@ -166,7 +185,18 @@ public class ProductService {
     }
 
     private static double getProductsPriceSum(Collection<Product> products) {
+        if (products.isEmpty()) return 0;
+
+        // define and adhere to a project wide convention, more than to the static code analysis tools
+        if (products.isEmpty()) {
+            return 0;
+        }
+
         //TODO replace with StreamSupport.parallel
+        return getProductsPrice(products);
+    }
+
+    private static double getProductsPrice(Collection<Product> products) {
         return products.stream()
                        .filter(Objects::nonNull)
                        .mapToDouble(Product::getPrice)
@@ -223,6 +253,17 @@ public class ProductService {
             @SuppressWarnings("unused")
             final Product product = buildProduct(20);
         }
+
+        displayProducts();
+    }
+
+    private void displayProducts() {
+        for (Product product : products) {
+            System.out.println(product);
+            if (product.getName().length() > 5) {
+                //..
+            }
+        }
     }
 
     public List<ProductEntity> getAllDatabaseProducts() {
@@ -233,5 +274,9 @@ public class ProductService {
     private static ProductEntity buildProductEntityFromResultSet(ResultSet rs) throws SQLException {
         return new ProductEntity(rs.getInt("id"), rs.getString("name"),
                 rs.getDouble("price"));
+    }
+
+    public Product getProductById(int id, Optional<String> productName) {
+        return buildProduct(id);
     }
 }
