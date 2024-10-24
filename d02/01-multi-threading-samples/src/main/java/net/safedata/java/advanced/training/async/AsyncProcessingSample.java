@@ -86,7 +86,7 @@ public class AsyncProcessingSample {
      * The product processor simulates the querying of several deposits for their stock of Products
      */
     private static class ProductProcessor implements Callable<Integer> {
-        private Integer depositId;
+        private final Integer depositId;
 
         ProductProcessor(final Integer depositId) {
             this.depositId = depositId;
