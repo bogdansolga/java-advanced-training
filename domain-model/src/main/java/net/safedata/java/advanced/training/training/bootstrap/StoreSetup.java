@@ -13,7 +13,7 @@ import java.util.List;
 
 public final class StoreSetup {
 
-    private static Store defaultStore;
+    private static final Store defaultStore;
 
     static {
         final Section tabletsSection = new Section(1, StoreSection.Tablets, buildDefaultTablets());

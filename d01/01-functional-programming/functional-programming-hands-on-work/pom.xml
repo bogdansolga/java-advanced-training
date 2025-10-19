@@ -10,6 +10,6 @@
         <version>1.0.0</version>
     </parent>
 
-    <artifactId>domain-model</artifactId>
+    <artifactId>functional-programming-hands-on-work</artifactId>
     <version>1.0.0</version>
 </project>

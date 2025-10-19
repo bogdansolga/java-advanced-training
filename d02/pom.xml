@@ -16,5 +16,6 @@
     <modules>
         <module>01-multi-threading-samples</module>
         <module>02-java-performance-analysis-application</module>
+        <module>multi-threading-hands-on-work</module>
     </modules>
 </project>

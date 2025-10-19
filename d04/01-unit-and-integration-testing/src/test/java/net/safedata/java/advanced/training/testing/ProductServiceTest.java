@@ -57,8 +57,8 @@ class ProductServiceTest {
         assertEquals(allProducts.size(), products.size(), "Not all the products were returned");
         assertTrue(allProducts.iterator().hasNext(), "There is just a single product");
         allProducts.forEach(productDTO -> {
-        	assertThat(productDTO.getId(), not(0));
-			assertThat("The name must not be null or empty", StringUtils.hasLength(productDTO.getProductName()));
+        	assertThat(productDTO.id(), not(0));
+			assertThat("The name must not be null or empty", StringUtils.hasLength(productDTO.productName()));
         });
     }
 
@@ -88,9 +88,9 @@ class ProductServiceTest {
         final ProductDTO resulted = productService.get(productId);
 
         assertNotNull(resulted);
-        assertThat(resulted.getProductName(), is(mockedName));
-        assertThat(resulted.getId(), not(0));
-        assertThat(resulted.getId(), is(productId));
+        assertThat(resulted.productName(), is(mockedName));
+        assertThat(resulted.id(), not(0));
+        assertThat(resulted.id(), is(productId));
     }
 
     @Test

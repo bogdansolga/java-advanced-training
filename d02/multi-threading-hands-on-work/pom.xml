@@ -6,17 +6,11 @@
 
     <parent>
         <groupId>net.safedata</groupId>
-        <artifactId>d01</artifactId>
+        <artifactId>d02</artifactId>
         <version>1.0.0</version>
     </parent>
 
-    <artifactId>01-functional-programming</artifactId>
+    <artifactId>multi-threading-hands-on-work</artifactId>
     <version>1.0.0</version>
-    <packaging>pom</packaging>
 
-    <modules>
-        <module>01-functional-interfaces</module>
-        <module>02-optional-class-and-streams-api</module>
-        <module>functional-programming-hands-on-work</module>
-    </modules>
 </project>

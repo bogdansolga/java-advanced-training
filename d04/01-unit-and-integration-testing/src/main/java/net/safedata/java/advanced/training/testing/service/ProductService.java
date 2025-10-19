@@ -40,7 +40,7 @@ public class ProductService {
     )
     public String save(final ProductDTO productDTO) {
         // a lot of processing goes in here, before actually saving the product :)
-        productRepository.save(new Product(productDTO.getProductName()));
+        productRepository.save(new Product(productDTO.productName()));
         return "OK";
     }
 
@@ -63,7 +63,7 @@ public class ProductService {
         return StreamSupport.stream(productRepository.findAll().spliterator(), false)
                             .filter(filterItem())
                             .map(getProductConverter())
-                            .sorted(Comparator.comparing(ProductDTO::getProductName))
+                            .sorted(Comparator.comparing(ProductDTO::productName))
                             .collect(Collectors.toList());
     }
 
@@ -89,7 +89,7 @@ public class ProductService {
 
     private BiFunction<ProductDTO, Product, Product> convertProductForUpdate() {
         return (dto, existingProduct) -> {
-            existingProduct.setName(dto.getProductName());
+            existingProduct.setName(dto.productName());
             return existingProduct;
         };
     }

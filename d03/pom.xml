@@ -15,5 +15,6 @@
 
     <modules>
         <module>01-clean-coding-examples</module>
+        <module>clean-coding-hands-on-work</module>
     </modules>
 </project>
